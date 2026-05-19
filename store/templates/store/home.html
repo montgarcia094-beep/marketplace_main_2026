@@ -1,35 +1,63 @@
-{% extends 'store/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Catálogo de Productos</h2>
 
-<h2 class="mb-4">Productos</h2>
+    <form method="GET" class="row mb-4">
+        <div class="col-md-5">
+            <input type="text" name="q" class="form-control" placeholder="Buscar productos..." value="{{ request.GET.q|default:'' }}">
+        </div>
+        <div class="col-md-4">
+            <select name="category" class="form-control form-select">
+                <option value="">Todas las categorías</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Buscar</button>
+        </div>
+    </form>
 
-<div class="row">
-    {% for product in products %}
-    <div class="col-md-4">
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <h5>{{ product.name }}</h5>
-                <p>{{ product.description|truncatechars:80 }}</p>
-
-                <p><strong>$ {{ product.price }}</strong></p>
-
-                <small class="text-muted">
-                    Vendedor: {{ product.owner.username }}
-                </small>
-
-                <div class="mt-2">
-                    {% for cat in product.categories.all %}
-                        <span class="badge bg-secondary">{{ cat.name }}</span>
-                    {% endfor %}
+    <div class="row">
+        {% for product in page_obj %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                    <p class="card-text"><strong>Precio:</strong> ${{ product.price }}</p>
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-success">Agregar al carrito</a>
                 </div>
-
             </div>
         </div>
+        {% empty %}
+        <p>No se encontraron productos.</p>
+        {% endfor %}
     </div>
-    {% empty %}
-        <p>No hay productos aún.</p>
-    {% endfor %}
-</div>
 
+    <nav aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Anterior</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Siguiente</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endblock %}
