@@ -1,3 +1,16 @@
-{% if user.is_authenticated and user.is_seller %}
-    <a href="{% url 'dashboard' %}" class="btn btn-warning btn-sm me-2">Dashboard</a>
-{% endif %}
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center" style="max-width: 500px;">
+    <h2>¿Estás seguro de que deseas eliminar este producto?</h2>
+    <p class="text-danger">Esta acción no se puede deshacer.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+        
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
